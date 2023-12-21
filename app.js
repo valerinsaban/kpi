@@ -2,23 +2,28 @@ let { createApp, ref } = Vue
 
 createApp({
   setup() {
+    let fecha_inicio = ref(moment().format('YYYY-MM-DD'));
+    let fecha_fin = ref(moment().format('YYYY-MM-DD'));
     let familias = ref([]);
     let productos = ref([]);
     return {
       productos,
-      familias
+      familias,
+      fecha_inicio,
+      fecha_fin
     }
   },
   async created() {
-    await this.familias();
+    // await this.getFamilias();
   },
   methods: {
-    async setProductos(data) {
-      this.productos = data;
+    async getProductos(data) {
+      this.productos = data.productos;
+      
       console.log(this.productos);
     },
-    async setFamilias() {
-      let familias = await axios('http://localhost:3000/kpi/productos/2023-12-19/2023-12-19');
+    async getFamilias() {
+      let familias = await axios(`http://localhost:3000/kpi/productos/${this.fecha_inicio}/${this.fecha_fin}`);
       this.familias = familias.data.data;
       let totales_familias = [];
       let nombres_familias = [];
@@ -37,12 +42,12 @@ createApp({
           type: 'pie',
           events: {
             dataPointSelection: async (event, chartContext, config) => {
-              await this.setProductos(this.familias[config.dataPointIndex]);
+              await this.getProductos(this.familias[config.dataPointIndex]);
             }
           }
         },
         labels: nombres_familias,
-        colors: colores_familias,
+        // colors: colores_familias,
         responsive: [{
           breakpoint: 480,
           options: {
